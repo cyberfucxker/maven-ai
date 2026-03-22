@@ -27,7 +27,7 @@ export default function Contact() {
           Accept: "application/json",
         },
         body: JSON.stringify({
-          access_key: import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "YOUR_ACCESS_KEY_HERE", // Placed via environment variable
+          access_key: "173ccb14-444e-4cea-a3d1-9b779cbd76dd", // Your direct Web3Forms Key
           subject: "New Lead from MAVEN AI Website",
           from_name: "MAVEN AI Contact Form",
           ...formState
