@@ -19,30 +19,34 @@ export default function Contact() {
     setErrorStatus(false);
 
     try {
-      // We are using Web3Forms (A free, reliable lead-gen API)
-      const response = await fetch("https://api.web3forms.com/submit", {
+      // 🚀 GOOGLE SHEETS WEBHOOK URL
+      // Replace this string with the URL you get from Google Apps Script
+      const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbzUC08iPSMaDfb5exDQaApYxUKXWijXbwdfFrIKVkmQT18s7pF2vU0_g7Dt0U1Ul9AE/exec";
+
+      // Form data formatted for Google Apps Script to parse easily
+      const formData = new URLSearchParams();
+      formData.append("name", formState.name);
+      formData.append("email", formState.email);
+      formData.append("service", formState.service);
+      formData.append("budget", formState.budget);
+      formData.append("message", formState.message);
+      formData.append("source", "MAVEN AI Website");
+
+      // Send to Google Sheets (no-cors prevents cross-origin blocked errors)
+      await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify({
-          access_key: "173ccb14-444e-4cea-a3d1-9b779cbd76dd", // Your direct Web3Forms Key
-          subject: "New Lead from MAVEN AI Website",
-          from_name: "MAVEN AI Contact Form",
-          ...formState
-        }),
+        body: formData.toString(),
+        mode: "no-cors",
       });
 
-      const result = await response.json();
-      if (result.success) {
-        setSubmitted(true);
-        setFormState({ name: '', email: '', service: '', budget: '', message: '' });
-        setTimeout(() => setSubmitted(false), 4000);
-      } else {
-        setErrorStatus(true);
-        setTimeout(() => setErrorStatus(false), 4000);
-      }
+      // Since no-cors returns an opaque response, we assume success if fetch didn't throw an error
+      setSubmitted(true);
+      setFormState({ name: '', email: '', service: '', budget: '', message: '' });
+      setTimeout(() => setSubmitted(false), 4000);
+
     } catch (error) {
       console.error("Error submitting form:", error);
       setErrorStatus(true);
