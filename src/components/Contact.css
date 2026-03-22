@@ -189,6 +189,11 @@ a.contact__detail-value:hover {
   color: var(--bg-base);
 }
 
+.contact__submit--error {
+  background: #ef4444; /* red error color */
+  color: var(--bg-base);
+}
+
 @media (max-width: 768px) {
   .contact__grid {
     grid-template-columns: 1fr;

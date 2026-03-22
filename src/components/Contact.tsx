@@ -10,14 +10,46 @@ export default function Contact() {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorStatus, setErrorStatus] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // In production, connect to backend/email service
-    console.log('Form submitted:', formState);
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 4000);
-    setFormState({ name: '', email: '', service: '', budget: '', message: '' });
+    setIsSubmitting(true);
+    setErrorStatus(false);
+
+    try {
+      // We are using Web3Forms (A free, reliable lead-gen API)
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          access_key: import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "YOUR_ACCESS_KEY_HERE", // Placed via environment variable
+          subject: "New Lead from MAVEN AI Website",
+          from_name: "MAVEN AI Contact Form",
+          ...formState
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setSubmitted(true);
+        setFormState({ name: '', email: '', service: '', budget: '', message: '' });
+        setTimeout(() => setSubmitted(false), 4000);
+      } else {
+        setErrorStatus(true);
+        setTimeout(() => setErrorStatus(false), 4000);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      setErrorStatus(true);
+      setTimeout(() => setErrorStatus(false), 4000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -136,9 +168,13 @@ export default function Contact() {
 
             <button
               type="submit"
-              className={`contact__submit ${submitted ? 'contact__submit--sent' : ''}`}
+              disabled={isSubmitting || submitted}
+              className={`contact__submit ${submitted ? 'contact__submit--sent' : ''} ${errorStatus ? 'contact__submit--error' : ''}`}
             >
-              {submitted ? '✓ Message Sent!' : 'Send Message →'}
+              {isSubmitting ? 'Sending...' : 
+               submitted ? '✓ Message Sent!' : 
+               errorStatus ? '❌ Failed. Try Again.' : 
+               'Send Message →'}
             </button>
           </form>
         </div>
